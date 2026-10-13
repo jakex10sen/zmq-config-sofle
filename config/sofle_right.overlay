@@ -1,0 +1,64 @@
+/*
+ * Right (peripheral) half: Azoteq TPS43 trackpad on the OLED header.
+ *
+ * Wiring (by signal name; check pin numbers against your module's datasheet
+ * revision, the published J1 tables disagree):
+ *   VDDHI -> OLED header VCC (nice!nano switched 3.3V; module takes 1.65-3.6V)
+ *   GND   -> OLED header GND
+ *   SCL   -> OLED header SCL (D3, P0.20)
+ *   SDA   -> OLED header SDA (D2, P0.17)
+ *   RDY   -> nice!nano P1.01 (extra pad; see TRACKPAD_RDY_PIN)
+ *   NRST  -> nice!nano P1.02 (extra pad; see TRACKPAD_RST_PIN)
+ *
+ * Both extra pads are unused by the Sofle, unlike D0/D1/D4, which the Sofle
+ * PCB or shield already uses (D1 is the RGB underglow data line).
+ */
+
+#include "sofle_trackpad.dtsi"
+
+/* Change these if you wire RDY or NRST to different free pins. */
+#define TRACKPAD_RDY_PIN <&gpio1 1 GPIO_ACTIVE_HIGH>
+/*
+ * NRST is active low on the module, but the driver drives the pin low then
+ * high itself, so it must be declared ACTIVE_HIGH here.
+ */
+#define TRACKPAD_RST_PIN <&gpio1 2 GPIO_ACTIVE_HIGH>
+
+/* The trackpad replaces the right-hand OLED on the header. */
+&oled {
+    status = "disabled";
+};
+
+&pro_micro_i2c {
+    status = "okay";
+
+    trackpad: trackpad@74 {
+        compatible = "azoteq,tps43";
+        reg = <0x74>;
+        rdy-gpios = TRACKPAD_RDY_PIN;
+        rst-gpios = TRACKPAD_RST_PIN;
+
+        /* Sleep the trackpad when the keyboard sleeps. */
+        enable-power-management;
+
+        /* IIR + MAV + ALP filters with dynamic IIR (driver's recommended mix). */
+        filter-settings = <0x0B>;
+
+        single-tap;         /* left click */
+        two-finger-tap;     /* right click */
+        three-finger-tap;   /* middle click */
+        press-and-hold;     /* drag */
+        scroll;             /* two-finger scroll */
+
+        /* Uncomment to fix orientation once mounted:
+         * switch-xy;
+         * invert-x;
+         * invert-y;
+         * invert-scroll-y;
+         */
+    };
+};
+
+&trackpad_split {
+    device = <&trackpad>;
+};

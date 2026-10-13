@@ -1,0 +1,45 @@
+/*
+ * Azoteq TPS43 (IQS572, I2C) trackpad on the RIGHT half, wired to the OLED
+ * header in place of the right-hand display.
+ *
+ * Shared by both halves: the right (peripheral) half forwards trackpad events
+ * through the input split below, and the left (central) half receives them and
+ * sends them to the host via the listener.
+ */
+
+#include <behaviors.dtsi>
+#include <zephyr/dt-bindings/input/input-event-codes.h>
+
+/ {
+    split_inputs {
+        #address-cells = <1>;
+        #size-cells = <0>;
+
+        trackpad_split: trackpad_split@0 {
+            compatible = "zmk,input-split";
+            reg = <0>;
+        };
+    };
+
+    input_processors {
+        /*
+         * The driver reports finger contact as INPUT_BTN_TOUCH, which ZMK's
+         * input listener turns into a held left button: every cursor move
+         * would become a drag. Swallow it; taps and press-and-hold still
+         * send real clicks.
+         */
+        zip_drop_touch: zip_drop_touch {
+            compatible = "zmk,input-processor-behaviors";
+            #input-processor-cells = <0>;
+            codes = <INPUT_BTN_TOUCH>;
+            bindings = <&none>;
+        };
+    };
+
+    trackpad_listener: trackpad_listener {
+        compatible = "zmk,input-listener";
+        status = "disabled";
+        device = <&trackpad_split>;
+        input-processors = <&zip_drop_touch>;
+    };
+};
