@@ -1,0 +1,48 @@
+/*
+ * Right (peripheral) half: Cirque TM023023 trackpad on the OLED header.
+ *
+ * Wiring (TM023023 J1, 12-pin 0.5mm FFC):
+ *   pin 12 VDD  -> OLED header VCC (nice!nano switched 3.3V)
+ *   pin 11 GND  -> OLED header GND
+ *   pin  9 SCL  -> OLED header SCL
+ *   pin 10 SDA  -> OLED header SDA
+ *   pin  4 DR   -> nice!nano P1.01 (extra pad on the board; see TRACKPAD_DR_PIN)
+ * Plus 4.7k pull-ups from SDA and SCL to 3.3V (the pad has none).
+ *
+ * The DR wire is REQUIRED: Zephyr's cirque,pinnacle driver is interrupt-only
+ * and fails to initialise without data-ready-gpios.
+ */
+
+#include "sofle_trackpad.dtsi"
+
+/* Change this if you wire DR to a different free pin. */
+#define TRACKPAD_DR_PIN <&gpio1 1 GPIO_ACTIVE_LOW>
+
+/* The trackpad replaces the right-hand OLED on the header. */
+&oled {
+    status = "disabled";
+};
+
+&pro_micro_i2c {
+    status = "okay";
+
+    trackpad: trackpad@2a {
+        compatible = "cirque,pinnacle";
+        reg = <0x2a>;
+        /* Directly wired DR must be configured active low (see binding). */
+        data-ready-gpios = TRACKPAD_DR_PIN;
+        data-mode = "relative";
+        sensitivity = "4x";
+        sleep-mode-enable;
+        primary-tap-enable;
+        /* Uncomment to fix orientation once mounted:
+         * invert-x;
+         * invert-y;
+         * swap-xy;
+         */
+    };
+};
+
+&trackpad_split {
+    device = <&trackpad>;
+};
