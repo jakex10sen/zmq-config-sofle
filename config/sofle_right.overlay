@@ -1,14 +1,16 @@
 /*
  * Right (peripheral) half: Azoteq TPS43 trackpad on the OLED header.
  *
- * Wiring (by signal name; check pin numbers against your module's datasheet
- * revision, the published J1 tables disagree):
- *   VDDHI -> OLED header VCC (nice!nano switched 3.3V; module takes 1.65-3.6V)
- *   GND   -> OLED header GND
- *   SCL   -> OLED header SCL (D3, P0.20)
- *   SDA   -> OLED header SDA (D2, P0.17)
- *   RDY   -> nice!nano P1.01 (extra pad; see TRACKPAD_RDY_PIN)
- *   NRST  -> nice!nano P1.02 (extra pad; see TRACKPAD_RST_PIN)
+ * Wiring (TPS43 J1, 6-pin ZIF; Azoteq datasheet rev 1.06, Table 2.1):
+ *   pin 1 RDY   -> nice!nano P1.01 (extra pad; see TRACKPAD_RDY_PIN)
+ *   pin 2 NRST  -> nice!nano P1.02 (extra pad; see TRACKPAD_RST_PIN)
+ *   pin 3 GND   -> OLED header GND
+ *   pin 4 VDDHI -> OLED header VCC (nice!nano switched 3.3V; module takes 1.65-3.6V)
+ *   pin 5 SCL   -> OLED header SCL (D3, P0.20)
+ *   pin 6 SDA   -> OLED header SDA (D2, P0.17)
+ * Older datasheet revisions show a different J1 table; use rev 1.06 or later.
+ * The datasheet doesn't list I2C pull-ups on the module, so add 4.7k from
+ * SDA and SCL to 3.3V.
  *
  * Both extra pads are unused by the Sofle, unlike D0/D1/D4, which the Sofle
  * PCB or shield already uses (D1 is the RGB underglow data line).
