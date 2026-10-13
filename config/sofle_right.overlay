@@ -1,0 +1,68 @@
+/*
+ * Right (peripheral) half: Azoteq TPS43 trackpad on the OLED header.
+ * Part: TPS43-201B-S (ZIF connector, standard gestures, 0.2mm black Mylar
+ * overlay, single packaged). Any TPS43 variant works with this config.
+ *
+ * Wiring (TPS43 J1, 6-pin ZIF; Azoteq datasheet rev 1.06, Table 2.1):
+ *   pin 1 RDY   -> nice!nano P1.01 (extra pad; see TRACKPAD_RDY_PIN)
+ *   pin 2 NRST  -> nice!nano P1.02 (extra pad; see TRACKPAD_RST_PIN)
+ *   pin 3 GND   -> OLED header GND
+ *   pin 4 VDDHI -> OLED header VCC (nice!nano switched 3.3V; module takes 1.65-3.6V)
+ *   pin 5 SCL   -> OLED header SCL (D3, P0.20)
+ *   pin 6 SDA   -> OLED header SDA (D2, P0.17)
+ * Older datasheet revisions show a different J1 table; use rev 1.06 or later.
+ * The datasheet doesn't list I2C pull-ups on the module, so add 4.7k from
+ * SDA and SCL to 3.3V.
+ *
+ * Both extra pads are unused by the Sofle, unlike D0/D1/D4, which the Sofle
+ * PCB or shield already uses (D1 is the RGB underglow data line).
+ */
+
+#include "sofle_trackpad.dtsi"
+
+/* Change these if you wire RDY or NRST to different free pins. */
+#define TRACKPAD_RDY_PIN <&gpio1 1 GPIO_ACTIVE_HIGH>
+/*
+ * NRST is active low on the module, but the driver drives the pin low then
+ * high itself, so it must be declared ACTIVE_HIGH here.
+ */
+#define TRACKPAD_RST_PIN <&gpio1 2 GPIO_ACTIVE_HIGH>
+
+/* The trackpad replaces the right-hand OLED on the header. */
+&oled {
+    status = "disabled";
+};
+
+&pro_micro_i2c {
+    status = "okay";
+
+    trackpad: trackpad@74 {
+        compatible = "azoteq,tps43";
+        reg = <0x74>;
+        rdy-gpios = TRACKPAD_RDY_PIN;
+        rst-gpios = TRACKPAD_RST_PIN;
+
+        /* Sleep the trackpad when the keyboard sleeps. */
+        enable-power-management;
+
+        /* IIR + MAV + ALP filters with dynamic IIR (driver's recommended mix). */
+        filter-settings = <0x0B>;
+
+        single-tap;         /* left click */
+        two-finger-tap;     /* right click */
+        three-finger-tap;   /* middle click */
+        press-and-hold;     /* drag */
+        scroll;             /* two-finger scroll */
+
+        /* Uncomment to fix orientation once mounted:
+         * switch-xy;
+         * invert-x;
+         * invert-y;
+         * invert-scroll-y;
+         */
+    };
+};
+
+&trackpad_split {
+    device = <&trackpad>;
+};

@@ -1,0 +1,10 @@
+/*
+ * Left (central) half: receive trackpad events from the right half and send
+ * them to the host.
+ */
+
+#include "sofle_trackpad.dtsi"
+
+&trackpad_listener {
+    status = "okay";
+};
