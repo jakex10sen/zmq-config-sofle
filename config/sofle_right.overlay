@@ -1,5 +1,7 @@
 /*
  * Right (peripheral) half: Azoteq TPS43 trackpad on the OLED header.
+ * Part: TPS43-201B-S (ZIF connector, standard gestures, 0.2mm black Mylar
+ * overlay, single packaged). Any TPS43 variant works with this config.
  *
  * Wiring (TPS43 J1, 6-pin ZIF; Azoteq datasheet rev 1.06, Table 2.1):
  *   pin 1 RDY   -> nice!nano P1.01 (extra pad; see TRACKPAD_RDY_PIN)
