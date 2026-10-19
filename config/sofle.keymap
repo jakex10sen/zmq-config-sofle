@@ -39,11 +39,11 @@
             acceleration-exponent = <0>;
         };
 
-        /* Left knob: scroll down / up */
+        /* Left knob: scroll up / down */
         enc_scroll_v: enc_scroll_v {
             compatible = "zmk,behavior-sensor-rotate";
             #sensor-binding-cells = <0>;
-            bindings = <&enc_scroll MOVE_Y(-ENC_SCROLL_VAL)>, <&enc_scroll MOVE_Y(ENC_SCROLL_VAL)>;
+            bindings = <&enc_scroll MOVE_Y(ENC_SCROLL_VAL)>, <&enc_scroll MOVE_Y(-ENC_SCROLL_VAL)>;
             tap-ms = <15>;
         };
 
